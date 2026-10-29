@@ -4,12 +4,12 @@
 #include <fstream>
 #include "Mundo.h"
 #include "glut.h"
-
+#include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
+#include <unistd.h>
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -17,11 +17,14 @@
 CMundo::CMundo()
 {
 	Init();
+	fd=-1;
 }
 
 CMundo::~CMundo()
 {
-
+	if (fd<0){
+		close(fd);
+	}
 }
 
 void CMundo::InitGL()
@@ -114,7 +117,8 @@ void CMundo::OnDraw()
 }
 
 void CMundo::OnTimer(int value)
-{	
+{
+	
 	jugador1.Mueve(0.025f);
 	jugador2.Mueve(0.025f);
 	esfera.Mueve(0.025f);
@@ -135,6 +139,15 @@ void CMundo::OnTimer(int value)
 		esfera.velocidad.x=2+2*rand()/(float)RAND_MAX;
 		esfera.velocidad.y=2+2*rand()/(float)RAND_MAX;
 		puntos2++;
+		char mensaje[1024];
+		sprintf(mensaje,"Jugador 2 marca 1 punto, lleva %d puntos .\n",puntos2);
+		write(fd,mensaje,strlen(mensaje));
+		//parte opcional par alimitar los puntos del jugador a 3
+		if(puntos2 >=3){
+		close(fd);
+		fd=-1;		
+		exit(0);//esto hace que salgamos de todo le programa no solo de la funcion ontimer
+		}
 	}
 
 	if(fondo_dcho.Rebota(esfera))
@@ -144,6 +157,15 @@ void CMundo::OnTimer(int value)
 		esfera.velocidad.x=-2-2*rand()/(float)RAND_MAX;
 		esfera.velocidad.y=-2-2*rand()/(float)RAND_MAX;
 		puntos1++;
+		char mensaje[1024];
+		sprintf(mensaje,"Jugador 1 marca 1punto, lleva %d puntos.\n",puntos1);
+		write(fd,mensaje,strlen(mensaje));
+		//parte opcional para limitar los puntos del jugador a 3
+		if(puntos1>=3){
+		close(fd);
+		fd=-1;
+		exit(0);
+		}
 	}
 
 }
@@ -164,6 +186,11 @@ void CMundo::OnKeyboardDown(unsigned char key, int x, int y)
 
 void CMundo::Init()
 {
+	fd=open("/tmp/tenis_fifo",O_WRONLY);
+	if(fd<0){
+		perror("No puede abrirse el fifo");
+		return ;
+	}
 	Plano p;
 //pared inferior
 	p.x1=-7;p.y1=-5;

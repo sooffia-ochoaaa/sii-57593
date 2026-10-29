@@ -5,6 +5,7 @@
 #if !defined(AFX_MUNDO_H__9510340A_3D75_485F_93DC_302A43B8039A__INCLUDED_)
 #define AFX_MUNDO_H__9510340A_3D75_485F_93DC_302A43B8039A__INCLUDED_
 
+
 #include <vector>
 #include "Plano.h"
 
@@ -18,6 +19,7 @@
 class CMundo  
 {
 public:
+	int fd;//fd de la tuberia fifo
 	void Init();
 	CMundo();
 	virtual ~CMundo();	
