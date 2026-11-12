@@ -15,10 +15,12 @@
 
 #include "Esfera.h"
 #include "Raqueta.h"
+#include "DatosMemCOmpartida.h"
 
 class CMundo  
 {
 public:
+DatosMemCOmpartida* datosCompartidos;
 	int fd;//fd de la tuberia fifo
 	void Init();
 	CMundo();

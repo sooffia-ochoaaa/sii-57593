@@ -10,6 +10,12 @@
 #include <string.h>
 #include <math.h>
 #include <unistd.h>
+
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -118,6 +124,19 @@ void CMundo::OnDraw()
 
 void CMundo::OnTimer(int value)
 {
+datosCompartidos->esfera=this->esfera;
+datosCompartidos->raqueta1=this->jugador1;
+
+if (datosCompartidos->accion==1){
+jugador1.velocidad.y=5.0f;
+}
+else if (datosCompartidos->accion==-1){
+jugador1.velocidad.y=-5.0f;
+}
+else jugador1.velocidad.y=0.0f;
+
+
+
 	
 	jugador1.Mueve(0.025f);
 	jugador2.Mueve(0.025f);
@@ -186,37 +205,51 @@ void CMundo::OnKeyboardDown(unsigned char key, int x, int y)
 
 void CMundo::Init()
 {
-	fd=open("/tmp/tenis_fifo",O_WRONLY);
-	if(fd<0){
-		perror("No puede abrirse el fifo");
-		return ;
-	}
-	Plano p;
+
+int fd=open("fichero_memoria", O_CREAT | O_RDWR, 0666);
+if (fd==-1){
+perror("Error al crear el fichero para memoria compartida");
+return;
+}
+ftruncate(fd,sizeof(DatosMemCOmpartida));
+
+void* ptr=mmap(NULL, sizeof(DatosMemCOmpartida), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+if (ptr==MAP_FAILED){
+perror("Error en mmap desde tenis");
+close(fd);
+return;
+}
+
+close(fd);
+
+datosCompartidos=(DatosMemCOmpartida*) ptr;
+datosCompartidos->accion=0;
+
+Plano p;
 //pared inferior
-	p.x1=-7;p.y1=-5;
-	p.x2=7;p.y2=-5;
-	paredes.push_back(p);
+p.x1=-7; p.y1=-5;
+p.x2=7; p.y2=-5;
+paredes.push_back(p);
+//pared superior
+p.x1=-7; p.y1=5;
+p.x2=7; p.y2=5;
+paredes.push_back(p);
+ fondo_izq.r=0;
+fondo_izq.x1=-7; fondo_izq.y1=-5;
+fondo_izq.x2=-7; fondo_izq.y2=5;
 
-//superior
-	p.x1=-7;p.y1=5;
-	p.x2=7;p.y2=5;
-	paredes.push_back(p);
+fondo_dcho.r=0;
+fondo_dcho.x1=7; fondo_dcho.y1=-5;
+fondo_dcho.x2=7; fondo_dcho.y2=5;
 
-	fondo_izq.r=0;
-	fondo_izq.x1=-7;fondo_izq.y1=-5;
-	fondo_izq.x2=-7;fondo_izq.y2=5;
+//a la izq
+jugador1.g=0;
+jugador1.x1=-6; jugador1.y1=-1;
+jugador1.x2=-6; jugador1.y2=1;
 
-	fondo_dcho.r=0;
-	fondo_dcho.x1=7;fondo_dcho.y1=-5;
-	fondo_dcho.x2=7;fondo_dcho.y2=5;
+//a la derecha
+jugador2.g=0;
+jugador2.x1=6; jugador2.y1=-1;
+jugador2.x2=6; jugador2.y2=1;
 
-	//a la izq
-	jugador1.g=0;
-	jugador1.x1=-6;jugador1.y1=-1;
-	jugador1.x2=-6;jugador1.y2=1;
-
-	//a la dcha
-	jugador2.g=0;
-	jugador2.x1=6;jugador2.y1=-1;
-	jugador2.x2=6;jugador2.y2=1;
 }

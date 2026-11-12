@@ -176,4 +176,5 @@ CMakeFiles/tenis.dir/src/tenis.cpp.o: \
  /usr/include/x86_64-linux-gnu/c++/15/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/c++io.h \
  /usr/include/c++/15/bits/fstream.tcc \
- /home/sofiaochoa/57593/sii-57593/workspace/include/Raqueta.h
+ /home/sofiaochoa/57593/sii-57593/workspace/include/Raqueta.h \
+ /home/sofiaochoa/57593/sii-57593/workspace/include/DatosMemCOmpartida.h
